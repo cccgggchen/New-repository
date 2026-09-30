@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="format-detection" content="telephone=no,email=no,address=no">
+<meta name="theme-color" content="#1b2a4a">
+<title>倒计时</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html { -webkit-text-size-adjust:100%; }
+  html, body { height:100%; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
+                 "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(160deg, #1b2a4a 0%, #2d1b4e 50%, #4a1b3d 100%);
+    color:#fff;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    text-align:center;
+    min-height:100vh;
+    min-height:100dvh;
+    padding: calc(28px + env(safe-area-inset-top)) 20px
+             calc(28px + env(safe-area-inset-bottom));
+    overflow:hidden;
+    position:relative;
+  }
+
+  /* 背景光晕装饰 */
+  body::before,
+  body::after {
+    content:'';
+    position:absolute;
+    border-radius:50%;
+    filter: blur(60px);
+    opacity:.45;
+    pointer-events:none;
+  }
+  body::before {
+    width:260px; height:260px;
+    background:#5b7cfa;
+    top:-80px; left:-80px;
+  }
+  body::after {
+    width:300px; height:300px;
+    background:#c04a9a;
+    bottom:-110px; right:-100px;
+  }
+
+  .wrap {
+    position:relative;
+    z-index:1;
+    width:100%;
+    max-width:420px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  /* ===== 图片 ===== */
+  .cover {
+    width:132px; height:132px;
+    border-radius:50%;
+    overflow:hidden;
+    border:3px solid rgba(255,255,255,.25);
+    box-shadow: 0 0 0 8px rgba(255,255,255,.06),
+                0 14px 34px rgba(0,0,0,.38);
+    background:rgba(255,255,255,.08);
+    margin-bottom:26px;
+    animation: float 4.5s ease-in-out infinite;
+  }
+  .cover img {
+    display:block;
+    width:100%; height:100%;
+    object-fit:cover;
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50%     { transform: translateY(-8px); }
+  }
+
+  /* ===== 文字 ===== */
+  .title {
+    font-size:22px;
+    font-weight:600;
+    letter-spacing:2px;
+    line-height:1.4;
+  }
+  .subtitle {
+    font-size:13px;
+    letter-spacing:1px;
+    opacity:.62;
+    margin-top:10px;
+  }
+
+  /* ===== 倒计时 ===== */
+  .countdown {
+    display:flex;
+    gap:8px;
+    width:100%;
+    max-width:340px;
+    margin-top:30px;
+  }
+  .unit {
+    flex:1 1 0;
+    min-width:0;
+    padding:13px 0 9px;
+    border-radius:14px;
+    background:rgba(255,255,255,.10);
+    border:1px solid rgba(255,255,255,.18);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:5px;
+  }
+  .num {
+    font-size:26px;
+    font-weight:700;
+    line-height:1;
+    letter-spacing:.5px;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+  .label {
+    font-size:11px;
+    opacity:.6;
+    letter-spacing:1px;
+  }
+  .tick { animation: pop .3s ease; }
+  @keyframes pop {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+
+  /* ===== 结束语 ===== */
+  .done {
+    display:none;
+    margin-top:30px;
+    font-size:20px;
+    font-weight:600;
+    letter-spacing:2px;
+    animation: pop .5s ease;
+  }
+
+  .footer {
+    margin-top:34px;
+    font-size:11px;
+    letter-spacing:2px;
+    opacity:.35;
+  }
+
+  /* 小屏适配 */
+  @media (max-width:360px) {
+    .cover { width:110px; height:110px; margin-bottom:20px; }
+    .title { font-size:19px; }
+    .num   { font-size:22px; }
+    .unit  { padding:11px 0 8px; border-radius:12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- ① 图片：换成你自己的图片地址 -->
+  <div class="cover">
+    <img src="cover.jpg" alt="">
+  </div>
+
+  <!-- ② 文字 -->
+  <h1 class="title">此时此刻，彼时彼刻</h1>
+  <p class="subtitle">距离贴贴 还有</p>
+
+  <!-- ③ 倒计时 -->
+  <div class="countdown" id="countdown">
+    <div class="unit"><span class="num" id="d">00</span><span class="label">天</span></div>
+    <div class="unit"><span class="num" id="h">00</span><span class="label">时</span></div>
+    <div class="unit"><span class="num" id="m">00</span><span class="label">分</span></div>
+    <div class="unit"><span class="num" id="s">00</span><span class="label">秒</span></div>
+  </div>
+
+  <!-- ④ 到点后显示 -->
+  <div class="done" id="done">🎉 时间到啦！</div>
+
+  <div class="footer">— 期待那一刻 —</div>
+</div>
+
+<script>
+(function () {
+  /* ============ 配置区（只改这里） ============ */
+
+  // 目标时间：注意月份从 0 开始！0=1月, 11=12月
+  // new Date(年, 月, 日, 时, 分, 秒)
+  var TARGET = new Date(2026, 9, 6, 12, 0, 0).getTime();
+
+  // 也可以用字符串写（iOS 不支持横杠，必须用斜杠）：
+  // var TARGET = new Date('2026/01/01 00:00:00').getTime();
+
+  /* =========================================== */
+
+  var els = {
+    d: document.getElementById('d'),
+    h: document.getElementById('h'),
+    m: document.getElementById('m'),
+    s: document.getElementById('s'),
+    countdown: document.getElementById('countdown'),
+    done: document.getElementById('done')
+  };
+
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+  var last = {};
+  function setVal(key, val) {
+    var el = els[key];
+    if (!el || last[key] === val) return;   // 值没变就不动，减少闪烁
+    last[key] = val;
+    el.textContent = val;
+    el.classList.remove('tick');
+    void el.offsetWidth;                    // 强制重排，重启动画
+    el.classList.add('tick');
+  }
+
+  var timer = null;
+
+  function tick() {
+    var diff = TARGET - Date.now();
+
+    if (diff <= 0) {
+      clearInterval(timer);
+      els.countdown.style.display = 'none';
+      els.done.style.display = 'block';
+      return;
+    }
+
+    var total = Math.floor(diff / 1000);
+    setVal('d', pad(Math.floor(total / 86400)));
+    setVal('h', pad(Math.floor(total % 86400 / 3600)));
+    setVal('m', pad(Math.floor(total % 3600 / 60)));
+    setVal('s', pad(total % 60));
+  }
+
+  tick();
+  timer = setInterval(tick, 200);   // 200ms 刷新，秒跳变更准
+
+  // 页面从后台切回前台时立即刷新一次
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) tick();
+  });
+})();
+</script>
+</body>
+</html>
